@@ -1298,66 +1298,78 @@ function exportChart(canvasId, label) {
     const startY = canvas.height * SC;
 
     // Fundo sutil da tabela
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.fillRect(0, startY, tmp.width, tblH * SC);
 
     // Linha separadora
     ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-    ctx.lineWidth = SC;
+    ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(0, startY); ctx.lineTo(tmp.width, startY); ctx.stroke();
 
-    // Calcular larguras de coluna
-    const headerCells = Array.from(tblRows[0].querySelectorAll('th'));
-    const nCols    = headerCells.length;
-    const labelW   = 180 * SC;
-    const dataColW = nCols > 1 ? (tmp.width - labelW) / (nCols - 1) : 0;
+    // Pegar só as últimas 12 colunas de dados (+1 col de label)
+    const allHeaderCells = Array.from(tblRows[0].querySelectorAll('th'));
+    const labelHeader    = allHeaderCells[0];
+    const dataCols       = allHeaderCells.slice(1);
+    const showCols       = dataCols.slice(-12); // últimas 12
+    const showIdxs       = showCols.map(c => allHeaderCells.indexOf(c)); // índices originais
+
+    const LABEL_W  = 160 * SC;
+    const DATA_W   = showCols.length > 0 ? (tmp.width - LABEL_W) / showCols.length : 0;
+    const FSZ      = 16;  // font size 1x (renderizado em 1x pois não escalamos o ctx)
+    const FSZ_SM   = 14;
+
+    // Abreviador: "dez. de 24" → "dez/24"
+    const abbrev = s => s.replace(/\. de /g, '/').replace(/\./g, '').trim();
 
     tblRows.forEach((row, rIdx) => {
       const y = startY + PAD * SC + rIdx * ROW_H * SC;
 
-      // Zebra leve nas linhas de dados
-      if (rIdx % 2 === 0 && rIdx > 0) {
+      // Zebra leve
+      if (rIdx > 0 && rIdx % 2 === 0) {
         ctx.fillStyle = 'rgba(255,255,255,0.03)';
-        ctx.fillRect(0, y - 18, tmp.width, ROW_H * SC);
+        ctx.fillRect(0, y - FSZ - 4, tmp.width, ROW_H * SC);
       }
 
-      const cells = Array.from(row.querySelectorAll('th,td'));
-      cells.forEach((cell, cIdx) => {
-        const x = cIdx === 0 ? PAD * SC : labelW + (cIdx - 0.5) * dataColW;
+      const allCells = Array.from(row.querySelectorAll('th,td'));
 
-        if (rIdx === 0) {
-          // Cabeçalho
-          ctx.font = `500 ${18 * SC / 2}px JetBrains Mono, monospace`;
-          ctx.fillStyle = 'rgba(138,154,184,1)';
-          ctx.textAlign = cIdx === 0 ? 'left' : 'center';
-          ctx.fillText(cell.textContent.trim(), x, y);
+      // Coluna de label (primeira)
+      const lCell = allCells[0];
+      if (rIdx === 0) {
+        ctx.font = `500 ${FSZ_SM}px JetBrains Mono, monospace`;
+        ctx.fillStyle = 'rgba(138,154,184,1)';
+        ctx.textAlign = 'left';
+        ctx.fillText(lCell.textContent.trim(), PAD * SC, y);
+      } else {
+        const dot = lCell.querySelector('.dot');
+        ctx.font = `500 ${FSZ}px JetBrains Mono, monospace`;
+        ctx.textAlign = 'left';
+        if (dot) {
+          ctx.fillStyle = dot.style.background || '#888';
+          ctx.beginPath();
+          ctx.arc(PAD * SC + 5, y - 5, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(220,228,244,0.95)';
+          ctx.fillText(lCell.textContent.trim(), PAD * SC + 18, y);
         } else {
-          // Célula de dado — primeira coluna tem dot colorido
-          if (cIdx === 0) {
-            const dot = cell.querySelector('.dot');
-            const text = cell.textContent.trim();
-            if (dot) {
-              const dotColor = dot.style.background || '#888';
-              ctx.fillStyle = dotColor;
-              ctx.beginPath();
-              ctx.arc(PAD * SC + 6 * SC, y - 5, 6 * SC / 2, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.fillStyle = 'rgba(200,208,224,0.95)';
-              ctx.font = `500 ${18 * SC / 2}px JetBrains Mono, monospace`;
-              ctx.textAlign = 'left';
-              ctx.fillText(text.replace(/^\s*/, ''), PAD * SC + 16 * SC / 2, y);
-            } else {
-              ctx.fillStyle = 'rgba(200,208,224,0.95)';
-              ctx.font = `500 ${18 * SC / 2}px JetBrains Mono, monospace`;
-              ctx.textAlign = 'left';
-              ctx.fillText(text, x, y);
-            }
-          } else {
-            ctx.fillStyle = 'rgba(200,208,224,0.85)';
-            ctx.font = `400 ${17 * SC / 2}px JetBrains Mono, monospace`;
-            ctx.textAlign = 'center';
-            ctx.fillText(cell.textContent.trim(), x, y);
-          }
+          ctx.fillStyle = 'rgba(220,228,244,0.95)';
+          ctx.fillText(lCell.textContent.trim(), PAD * SC, y);
+        }
+      }
+
+      // Colunas de dados (só as 12 selecionadas)
+      showIdxs.forEach((origIdx, i) => {
+        const cell = allCells[origIdx];
+        if (!cell) return;
+        const cx = LABEL_W + (i + 0.5) * DATA_W;
+        ctx.textAlign = 'center';
+        if (rIdx === 0) {
+          ctx.font = `500 ${FSZ_SM}px JetBrains Mono, monospace`;
+          ctx.fillStyle = 'rgba(138,154,184,1)';
+          ctx.fillText(abbrev(cell.textContent.trim()), cx, y);
+        } else {
+          ctx.font = `400 ${FSZ}px JetBrains Mono, monospace`;
+          ctx.fillStyle = 'rgba(200,210,230,0.88)';
+          ctx.fillText(cell.textContent.trim(), cx, y);
         }
       });
     });
