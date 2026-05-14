@@ -236,6 +236,7 @@
     header { flex-direction: column; align-items: flex-start; gap: 12px; }
   }
   @media (max-width: 480px) { .cards-grid { grid-template-columns: 1fr; } }
+<<<<<<< HEAD
 
   /* ── Card loading pulse ──────────────────────────────────────────── */
   @keyframes card-pulse {
@@ -257,6 +258,8 @@
     font-size: 11px; color: var(--text-dim);
     font-family: 'JetBrains Mono', monospace; opacity: 0.75;
   }
+=======
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 </style>
 </head>
 <body>
@@ -273,53 +276,86 @@
     <div class="header-right">
       <div class="status-dot warn" id="statusDot"></div>
       <span class="last-update" id="lastUpdate">Carregando...</span>
+<<<<<<< HEAD
       <span class="refresh-countdown" id="refreshCountdown"></span>
+=======
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
       <button class="btn-refresh" id="btnRefresh" onclick="loadAllData()">↻ Atualizar</button>
     </div>
   </header>
 
   <main>
     <section class="cards-grid">
+<<<<<<< HEAD
       <div class="kpi-card ipca loading" id="card-ipca">
+=======
+      <div class="kpi-card ipca">
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
         <div class="label">IPCA Acumulado 12m</div>
         <div class="value-row"><span class="value" id="ipcaVal">—</span><span class="unit">% a.a.</span></div>
         <div class="variation neutral" id="ipcaVar">—</div>
         <div class="date-ref" id="ipcaDate">—</div>
+<<<<<<< HEAD
         <div class="card-error" id="ipcaErr">Falha ao carregar</div>
       </div>
       <div class="kpi-card selic loading" id="card-selic">
+=======
+      </div>
+      <div class="kpi-card selic">
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
         <div class="label">Taxa Selic Meta</div>
         <div class="value-row"><span class="value" id="selicVal">—</span><span class="unit">% a.a.</span></div>
         <div class="variation neutral" id="selicVar">—</div>
         <div class="date-ref" id="selicDate">—</div>
+<<<<<<< HEAD
         <div class="card-error" id="selicErr">Falha ao carregar</div>
       </div>
       <div class="kpi-card cambio loading" id="card-cambio">
+=======
+      </div>
+      <div class="kpi-card cambio">
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
         <div class="label">Dólar (PTAX Venda)</div>
         <div class="value-row"><span class="value" id="cambioVal">—</span><span class="unit">R$/US$</span></div>
         <div class="variation neutral" id="cambioVar">—</div>
         <div class="date-ref" id="cambioDate">—</div>
+<<<<<<< HEAD
         <div class="card-error" id="cambioErr">Falha ao carregar</div>
       </div>
       <div class="kpi-card desemprego loading" id="card-desemp">
+=======
+      </div>
+      <div class="kpi-card desemprego">
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
         <div class="label">Desemprego Brasil (PNAD)</div>
         <div class="value-row"><span class="value" id="desempVal">—</span><span class="unit">%</span></div>
         <div class="variation neutral" id="desempVar">—</div>
         <div class="date-ref" id="desempDate">—</div>
+<<<<<<< HEAD
         <div class="card-error" id="desempErr">Falha ao carregar</div>
       </div>
       <div class="kpi-card loading" style="--card-accent:#7c3aed" id="card-desempRO">
+=======
+      </div>
+      <div class="kpi-card" style="--card-accent:#7c3aed">
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
         <div class="label">Desemprego Rondônia (PNAD)</div>
         <div class="value-row"><span class="value" id="desempROVal">—</span><span class="unit">%</span></div>
         <div class="variation neutral" id="desempROVar">—</div>
         <div class="date-ref" id="desempRODate">—</div>
+<<<<<<< HEAD
         <div class="card-error" id="desempROErr">Falha ao carregar</div>
       </div>
       <div class="kpi-card cdi loading" id="card-cdi">
+=======
+      </div>
+      <div class="kpi-card cdi">
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
         <div class="label">CDI Acumulado Mês</div>
         <div class="value-row"><span class="value" id="cdiVal">—</span><span class="unit">% a.m.</span></div>
         <div class="variation neutral" id="cdiVar">—</div>
         <div class="date-ref" id="cdiDate">—</div>
+<<<<<<< HEAD
         <div class="card-error" id="cdiErr">Falha ao carregar</div>
       </div>
       <div class="kpi-card loading" style="--card-accent:#06b6d4" id="card-igpm">
@@ -335,6 +371,8 @@
         <div class="variation neutral" id="inpcVar">—</div>
         <div class="date-ref" id="inpcDate">—</div>
         <div class="card-error" id="inpcErr">Falha ao carregar</div>
+=======
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
       </div>
     </section>
 
@@ -402,7 +440,11 @@
       <div class="chart-panel">
         <div class="panel-header">
           <div>
+<<<<<<< HEAD
             <div class="panel-title">Taxa de Desocupação — Brasil</div>
+=======
+            <div class="panel-title">Taxa de Desocupação</div>
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
             <div class="panel-subtitle">PNAD Contínua — % da PEA</div>
           </div>
           <div class="period-tabs" data-chart="desemp">
@@ -413,6 +455,7 @@
         </div>
         <div class="chart-wrap" style="position:relative">
           <canvas id="chartDesemp"></canvas>
+<<<<<<< HEAD
           <button class="btn-export" onclick="exportChart('chartDesemp','Desemprego_Brasil')" style="position:absolute;bottom:8px;right:8px;opacity:0.7;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.7">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v7.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 9.293V1.5A.5.5 0 0 1 8 1zM2 13.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
             PNG
@@ -429,6 +472,9 @@
         <div class="chart-wrap" style="position:relative">
           <canvas id="chartDesempRO"></canvas>
           <button class="btn-export" onclick="exportChart('chartDesempRO','Desemprego_Rondonia')" style="position:absolute;bottom:8px;right:8px;opacity:0.7;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.7">
+=======
+          <button class="btn-export" onclick="exportChart('chartDesemp','Desemprego')" style="position:absolute;bottom:8px;right:8px;opacity:0.7;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.7">
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v7.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 9.293V1.5A.5.5 0 0 1 8 1zM2 13.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
             PNG
           </button>
@@ -487,13 +533,18 @@
 const BCB   = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.';
 const FOCUS = 'https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/';
 const OLINDA_PTAX = 'https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/';
+<<<<<<< HEAD
 const SERIES = { ipca: 433, ipcaAcum: 13522, selic: 432, dolar: 1, desemp: 24369, cdi: 4391, igpm: 189, inpc: 188 };
+=======
+const SERIES = { ipca: 433, ipcaAcum: 13522, selic: 432, dolar: 1, desemp: 24369, cdi: 4391 };
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 
 const charts = {};
 const store = {};
 let errors = 0;
 
 // ============================
+<<<<<<< HEAD
 // CACHE — localStorage com TTL de 2 horas
 // ============================
 const CACHE_TTL = 2 * 60 * 60 * 1000;
@@ -511,6 +562,8 @@ function cacheGet(key) {
 }
 
 // ============================
+=======
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 // FETCH WITH JSONP FALLBACK
 // ============================
 // ── fetch com retry e delay ──────────────────────────────────────────────────
@@ -598,7 +651,11 @@ async function getSGS(code, start) {
   try {
     const raw = await tryFetch();
     if (raw && raw.length) {
+<<<<<<< HEAD
       cacheSet(key, raw);
+=======
+      try { sessionStorage.setItem(key, JSON.stringify(raw)); } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
       console.log(`✅ SGS ${code} fetch (dataInicial): ${raw.length} pts`);
       return raw;
     }
@@ -608,7 +665,11 @@ async function getSGS(code, start) {
   try {
     const raw = await tryJsonp();
     if (raw && raw.length) {
+<<<<<<< HEAD
       cacheSet(key, raw);
+=======
+      try { sessionStorage.setItem(key, JSON.stringify(raw)); } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
       console.log(`✅ SGS ${code} JSONP (dataInicial): ${raw.length} pts`);
       return raw;
     }
@@ -617,8 +678,13 @@ async function getSGS(code, start) {
   // 3) cache
   errors++;
   try {
+<<<<<<< HEAD
     const c = cacheGet(key);
     if (c) { console.log(`📦 SGS ${code} cache`); return c; }
+=======
+    const c = sessionStorage.getItem(key);
+    if (c) { console.log(`📦 SGS ${code} cache`); return JSON.parse(c); }
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
   } catch(_){}
   console.log(`💀 SGS ${code}: TODAS FALHARAM`);
   return null;
@@ -652,14 +718,22 @@ async function getDolar(start) {
       .map(([data,valor]) => ({data, valor: String(valor)}))
       .sort((a,b) => parseDate(a.data)-parseDate(b.data));
     if (data.length) {
+<<<<<<< HEAD
       cacheSet(key, data);
+=======
+      try { sessionStorage.setItem(key, JSON.stringify(data)); } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
       return data;
     }
     throw new Error('empty after convert');
   } catch(e2) {
     console.log(`❌ OLINDA PTAX falhou: ${e2.message}`);
     errors++;
+<<<<<<< HEAD
     try { const c = cacheGet(key); if (c) return c; } catch(_){}
+=======
+    try { const c = sessionStorage.getItem(key); if (c) return JSON.parse(c); } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
     return null;
   }
 }
@@ -742,7 +816,11 @@ async function getDesempRO() {
 
   // ── Fallback: cache ────────────────────────────────────────────────────────
   console.warn('[IBGE RO] Todas as 4 tentativas falharam');
+<<<<<<< HEAD
   try { const c = cacheGet(key); if (c) return c; } catch(_){}
+=======
+  try { const c = sessionStorage.getItem(key); if (c) return JSON.parse(c); } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
   return null;
 }
 
@@ -772,7 +850,11 @@ function sortPeriodo(s) {
 }
 
 function cacheRO(key, rows) {
+<<<<<<< HEAD
   cacheSet(key, rows);
+=======
+  try { sessionStorage.setItem(key, JSON.stringify(rows)); } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
   console.log('[IBGE RO] ✅ OK:', rows.length, 'tri | último:', JSON.stringify(rows.at(-1)));
 }
 
@@ -792,7 +874,11 @@ function setCardRO(data) {
   const v   = document.getElementById('desempROVal');
   const vr  = document.getElementById('desempROVar');
   const dt  = document.getElementById('desempRODate');
+<<<<<<< HEAD
   if (!data || !data.length) { if(v) v.textContent = 'N/D'; cardError('desempRO'); return; }
+=======
+  if (!data || !data.length) { if(v) v.textContent = 'N/D'; return; }
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
   const last = data.at(-1), prev = data.at(-2);
   const val = last.valor;
   if(v)  v.textContent  = val.toFixed(1).replace('.',',');
@@ -804,7 +890,10 @@ function setCardRO(data) {
     vr.className = 'variation ' + cl;
     vr.textContent = `${ar} ${Math.abs(d).toFixed(1).replace('.',',')} vs trimestre ant.`;
   }
+<<<<<<< HEAD
   cardLoaded('desempRO');
+=======
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 }
 
 // getSelic: cascata de séries alternativas para Selic Meta
@@ -836,7 +925,11 @@ async function getSelic(start) {
     try {
       const raw = await fetchJSON(t.url, 1, 0);
       if (raw && raw.length) {
+<<<<<<< HEAD
         cacheSet(key, raw);
+=======
+        try { sessionStorage.setItem(key, JSON.stringify(raw)); } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
         console.log(`✅ Selic via ${t.label}: ${raw.length} pts`);
         return raw;
       }
@@ -846,7 +939,11 @@ async function getSelic(start) {
       const jpUrl = t.url.replace('formato=json','formato=jsonp');
       const raw = await jsonp(jpUrl);
       if (raw && raw.length) {
+<<<<<<< HEAD
         cacheSet(key, raw);
+=======
+        try { sessionStorage.setItem(key, JSON.stringify(raw)); } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
         console.log(`✅ Selic JSONP ${t.label}: ${raw.length} pts`);
         return raw;
       }
@@ -855,7 +952,11 @@ async function getSelic(start) {
 
   // Cache
   errors++;
+<<<<<<< HEAD
   try { const c = cacheGet(key); if (c) { console.log('📦 Selic cache'); return c; } } catch(_){}
+=======
+  try { const c = sessionStorage.getItem(key); if (c) { console.log('📦 Selic cache'); return JSON.parse(c); } } catch(_){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
   console.log('💀 Selic: TODAS as séries falharam');
   return null;
 }
@@ -871,10 +972,17 @@ async function getFocus() {
       if (!r.ok) throw new Error(r.status);
       const j = await r.json();
       out[ind] = j.value || [];
+<<<<<<< HEAD
       cacheSet(key, out[ind]);
     } catch (e) {
       errors++;
       try { const c = cacheGet(key); if (c) out[ind] = c; } catch(e2){}
+=======
+      try { sessionStorage.setItem(key, JSON.stringify(out[ind])); } catch(e){}
+    } catch (e) {
+      errors++;
+      try { const c = sessionStorage.getItem(key); if (c) out[ind] = JSON.parse(c); } catch(e2){}
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
     }
   }
   return out;
@@ -889,6 +997,7 @@ function fby(data, y) { const c = new Date(); c.setFullYear(c.getFullYear()-y); 
 function rgb(h) { return [1,3,5].map(i => parseInt(h.slice(i,i+2),16)).join(','); }
 
 // ============================
+<<<<<<< HEAD
 // CARD STATE HELPERS
 // ============================
 function cardLoaded(id) {
@@ -959,23 +1068,37 @@ function startCountdown() {
 }
 
 // ============================
+=======
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 // CARDS
 // ============================
 function setCard(id, data, o={}) {
   const v = document.getElementById(id+'Val'), vr = document.getElementById(id+'Var'), dt = document.getElementById(id+'Date');
+<<<<<<< HEAD
   if (!data || !data.length) { if(v) v.textContent = 'N/D'; cardError(id); return; }
   const last = data.at(-1), prev = data.at(-2);
   const val = parseFloat(last.valor);
   if(v)  v.textContent  = val.toFixed(o.dec||2).replace('.',',');
   if(dt) dt.textContent = 'Ref: ' + last.data;
   if (prev && vr) {
+=======
+  if (!data || !data.length) { v.textContent = 'N/D'; return; }
+  const last = data.at(-1), prev = data.at(-2);
+  const val = parseFloat(last.valor);
+  v.textContent = val.toFixed(o.dec||2).replace('.',',');
+  dt.textContent = 'Ref: ' + last.data;
+  if (prev) {
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
     const p = parseFloat(prev.valor), d = val - p;
     const ar = d > 0 ? '▲' : d < 0 ? '▼' : '—';
     const cl = o.inv ? (d>0?'down':d<0?'up':'neutral') : (d>0?'up':d<0?'down':'neutral');
     vr.className = 'variation ' + cl;
     vr.textContent = `${ar} ${Math.abs(d).toFixed(2).replace('.',',')} vs anterior`;
   }
+<<<<<<< HEAD
   cardLoaded(id);
+=======
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 }
 
 // ============================
@@ -1083,6 +1206,7 @@ function exportChart(canvasId, label) {
   const ctx = tmp.getContext('2d');
 
   // Fundo azul escuro da marca
+<<<<<<< HEAD
   // Fundo transparente — sem fillRect
 
   // Copiar o gráfico em alta resolução (2x para nitidez na apresentação)
@@ -1094,6 +1218,26 @@ function exportChart(canvasId, label) {
   ctx.font = '500 18px DM Sans, sans-serif';
   ctx.fillStyle = 'rgba(80,80,80,0.40)';
   ctx.fillText('protagonize™ · Painel Econômico', 20, tmp.height - 16);
+=======
+  ctx.fillStyle = '#1C2A4A';
+  ctx.fillRect(0, 0, tmp.width, tmp.height);
+
+  // Borda sutil
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 2;
+  ctx.roundRect(1, 1, tmp.width-2, tmp.height-2, 12);
+  ctx.stroke();
+
+  // Copiar o gráfico em alta resolução
+  ctx.scale(2, 2);
+  ctx.drawImage(canvas, 0, 0);
+
+  // Adicionar label no canto inferior esquerdo
+  ctx.scale(0.5, 0.5); // voltar escala para escrever em px reais
+  ctx.font = '500 20px DM Sans, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.fillText('protagonize™ · Painel Econômico', 24, tmp.height - 18);
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 
   // Baixar
   const date = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
@@ -1122,12 +1266,19 @@ async function loadAllData() {
 
   const s10 = startDate(10), s1 = startDate(1);
 
+<<<<<<< HEAD
   // IPCA, Desemprego e novos indicadores primeiro (mais estáveis)
   const [ipcaM, ipcaA, desemp, desempRO, igpm, inpc] = await Promise.all([
+=======
+  // Carregar sequencialmente para evitar rate limit do BCB
+  // IPCA e Desemprego primeiro (mais estáveis)
+  const [ipcaM, ipcaA, desemp, desempRO] = await Promise.all([
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
     getSGS(SERIES.ipca, s10),
     getSGS(SERIES.ipcaAcum, s10),
     getSGS(SERIES.desemp, s10),
     getDesempRO(),
+<<<<<<< HEAD
     getSGS(SERIES.igpm, s10),
     getSGS(SERIES.inpc, s10),
   ]);
@@ -1137,10 +1288,23 @@ async function loadAllData() {
   const selic = await getSelic(s10);
   await new Promise(r => setTimeout(r, 300));
   const cdi = await getSGS(SERIES.cdi, s1);
+=======
+  ]);
+  // Pausa para evitar rate limit
+  await new Promise(r => setTimeout(r, 500));
+  // Dolar e Focus (independentes)
+  const [dolar, focus] = await Promise.all([getDolar(s10), getFocus()]);
+  await new Promise(r => setTimeout(r, 300));
+  // Selic e CDI separados com pausa entre eles
+  const selic = await getSelic(s10);
+  await new Promise(r => setTimeout(r, 300));
+  const cdi   = await getSGS(SERIES.cdi, s1);
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 
   store.ipcaMensal = ipcaM; store.ipcaAcum = ipcaA;
   store.selicMeta = selic; store.dolar = dolar;
   store.desemp = desemp; store.cdi = cdi;
+<<<<<<< HEAD
   store.desempRO = desempRO; store.igpm = igpm; store.inpc = inpc;
 
   setCard('ipca',   ipcaA, {dec:2});
@@ -1161,10 +1325,33 @@ async function loadAllData() {
   // Histórico longo de Selic em background
   if (selic && selic.length < 100) {
     setTimeout(async () => {
+=======
+
+  setCard('ipca', ipcaA, {dec:2});
+  setCard('selic', selic, {dec:2});
+  setCard('cambio', dolar, {dec:4});
+  setCard('desemp', desemp, {dec:1, inv:true});
+  setCardRO(desempRO);
+  setCard('cdi', cdi, {dec:2});
+
+  mkChart('chartIpca',  fby(ipcaA,5), chartCfg.ipca.o);
+  mkChart('chartSelic', fby(selic,5), chartCfg.selic.o);
+  mkChart('chartCambio',fby(dolar,3), chartCfg.cambio.o);
+  mkChart('chartDesemp',fby(desemp,5),chartCfg.desemp.o);
+
+  // Buscar histórico longo de Selic para gráficos (em background, não bloqueia UI)
+  if (selic && selic.length < 100) {
+    setTimeout(async () => {
+      console.log('🔄 Buscando histórico longo Selic...');
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
       const selicLong = await getSGSLong(SERIES.selic, startDate(10));
       if (selicLong && selicLong.length > selic.length) {
         store.selicMeta = selicLong;
         mkChart('chartSelic', fby(selicLong,5), chartCfg.selic.o);
+<<<<<<< HEAD
+=======
+        console.log(`✅ Selic histórico: ${selicLong.length} pts`);
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
       }
     }, 1500);
   }
@@ -1180,7 +1367,10 @@ async function loadAllData() {
   if (errors >= 7) document.getElementById('envBanner').classList.add('show');
 
   btn.classList.remove('loading'); btn.textContent = '↻ Atualizar';
+<<<<<<< HEAD
   startCountdown();
+=======
+>>>>>>> de0efa6e0f9bb3dd6bc6705194a418b56cee9947
 }
 
 // Period tabs
