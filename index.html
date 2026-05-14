@@ -1317,7 +1317,7 @@ function exportChart(canvasId, label) {
 
       // Zebra leve
       if (rIdx > 0 && rIdx % 2 === 0) {
-        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillStyle = 'rgba(0,0,0,0.04)';
         ctx.fillRect(0, y - FSZ - 4, tmp.width, ROW_H * SC);
       }
 
@@ -1327,7 +1327,7 @@ function exportChart(canvasId, label) {
       const lCell = allCells[0];
       if (rIdx === 0) {
         ctx.font = `500 ${FSZ_SM}px JetBrains Mono, monospace`;
-        ctx.fillStyle = 'rgba(138,154,184,1)';
+        ctx.fillStyle = 'rgba(80,90,110,1)';
         ctx.textAlign = 'left';
         ctx.fillText(lCell.textContent.trim(), PAD * SC, y);
       } else {
@@ -1339,10 +1339,10 @@ function exportChart(canvasId, label) {
           ctx.beginPath();
           ctx.arc(PAD * SC + 5, y - 5, 5, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = 'rgba(220,228,244,0.95)';
+          ctx.fillStyle = 'rgba(30,35,45,0.95)';
           ctx.fillText(lCell.textContent.trim(), PAD * SC + 18, y);
         } else {
-          ctx.fillStyle = 'rgba(220,228,244,0.95)';
+          ctx.fillStyle = 'rgba(30,35,45,0.95)';
           ctx.fillText(lCell.textContent.trim(), PAD * SC, y);
         }
       }
@@ -1355,11 +1355,11 @@ function exportChart(canvasId, label) {
         ctx.textAlign = 'center';
         if (rIdx === 0) {
           ctx.font = `500 ${FSZ_SM}px JetBrains Mono, monospace`;
-          ctx.fillStyle = 'rgba(138,154,184,1)';
+          ctx.fillStyle = 'rgba(80,90,110,1)';
           ctx.fillText(abbrev(cell.textContent.trim()), cx, y);
         } else {
           ctx.font = `400 ${FSZ}px JetBrains Mono, monospace`;
-          ctx.fillStyle = 'rgba(200,210,230,0.88)';
+          ctx.fillStyle = 'rgba(30,35,45,0.88)';
           ctx.fillText(cell.textContent.trim(), cx, y);
         }
       });
@@ -1368,7 +1368,7 @@ function exportChart(canvasId, label) {
 
   // ── Watermark ─────────────────────────────────────────────────────
   ctx.font = `500 ${18}px DM Sans, sans-serif`;
-  ctx.fillStyle = 'rgba(80,80,80,0.38)';
+  ctx.fillStyle = 'rgba(60,60,60,0.45)';
   ctx.textAlign = 'left';
   ctx.fillText('protagonize™ · Painel Econômico', 20, tmp.height - 16);
 
