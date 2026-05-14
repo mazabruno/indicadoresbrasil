@@ -257,6 +257,37 @@
     font-size: 11px; color: var(--text-dim);
     font-family: 'JetBrains Mono', monospace; opacity: 0.75;
   }
+
+  /* ── Tabela de dados abaixo dos gráficos ─────────────────────────── */
+  .chart-data-table {
+    margin-top: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chart-data-table table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    white-space: nowrap;
+  }
+  .chart-data-table th {
+    padding: 4px 8px; color: var(--text-dim);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-weight: 500; text-align: center; letter-spacing: 0.5px;
+  }
+  .chart-data-table th.lbl { text-align: left; min-width: 120px; }
+  .chart-data-table td {
+    padding: 4px 8px; text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.06); color: var(--text-muted);
+  }
+  .chart-data-table td.lbl {
+    text-align: left; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .chart-data-table .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .chart-data-table tr:last-child td { border-bottom: none; }
+  .chart-data-table tr:hover td { background: rgba(255,255,255,0.04); }
 </style>
 </head>
 <body>
@@ -353,11 +384,12 @@
         </div>
         <div class="chart-wrap" style="position:relative">
           <canvas id="chartIpca"></canvas>
-          <button class="btn-export" onclick="exportChart('chartIpca','IPCA 12m')" style="position:absolute;bottom:8px;right:8px;opacity:0.7;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.7">
+          <button class="btn-export" onclick="exportChart('chartIpca','IPCA_12m')" style="position:absolute;bottom:8px;right:8px;opacity:0.7;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.7">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v7.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 9.293V1.5A.5.5 0 0 1 8 1zM2 13.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
             PNG
           </button>
         </div>
+        <div class="chart-data-table" id="tbl-chartIpca"></div>
       </div>
       <div class="chart-panel">
         <div class="panel-header">
@@ -378,6 +410,7 @@
             PNG
           </button>
         </div>
+        <div class="chart-data-table" id="tbl-chartSelic"></div>
       </div>
       <div class="chart-panel">
         <div class="panel-header">
@@ -418,6 +451,7 @@
             PNG
           </button>
         </div>
+        <div class="chart-data-table" id="tbl-chartDesemp"></div>
       </div>
       <div class="chart-panel">
         <div class="panel-header">
@@ -1104,6 +1138,88 @@ function buildDesempChart(id, brasil, ro, ac, years) {
 }
 
 // ============================
+// CHART DATA TABLE
+// ============================
+// series = [{label, color, data: [{label:string, value:number|null}]}]
+function buildChartTable(tableId, series, unit, periods) {
+  const el = document.getElementById(tableId);
+  if (!el) return;
+  if (!series || !series.length || !periods || !periods.length) { el.innerHTML=''; return; }
+
+  const cols = periods.slice(-16); // últimas 16 colunas
+
+  let html = '<table><thead><tr><th class="lbl">Indicador</th>';
+  cols.forEach(p => { html += `<th>${p}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  series.forEach(s => {
+    html += `<tr><td class="lbl"><span class="dot" style="background:${s.color}"></span>${s.label}</td>`;
+    cols.forEach(p => {
+      const v = s.data[p];
+      const txt = (v != null && !isNaN(v)) ? v.toFixed(2).replace('.',',') + (unit||'') : '—';
+      html += `<td>${txt}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// Prepara dados mensais para a tabela (retorna {período: valor})
+function toTableMap(data) {
+  const map = {};
+  (data||[]).forEach(d => {
+    const lbl = pd(d.data).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
+    map[lbl] = parseFloat(d.valor);
+  });
+  return map;
+}
+
+// Versão para dados já forward-filled (array paralelo ao base)
+function toTableMapFromArray(baseData, vals) {
+  const map = {};
+  (baseData||[]).forEach((d, i) => {
+    const lbl = pd(d.data).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
+    map[lbl] = (vals && vals[i] != null) ? vals[i] : null;
+  });
+  return map;
+}
+
+function refreshChartTables(years) {
+  // Períodos (labels mensais) do intervalo selecionado
+  const base = fby(store.ipcaAcum||[], years);
+  if (!base.length) return;
+  const periods = base.map(d => pd(d.data).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
+
+  // IPCA table
+  buildChartTable('tbl-chartIpca', [
+    {label:'IPCA 12m', color:'#3b82f6', data: toTableMap(fby(store.ipcaAcum||[], years))},
+    {label:'IGP-M',    color:'#06b6d4', data: toTableMap(fby(store.igpm||[], years))},
+    {label:'INPC',     color:'#ec4899', data: toTableMap(fby(store.inpc||[], years))},
+  ], ' %', periods);
+
+  // Selic table
+  const selicBase = fby(store.selicMeta||[], years);
+  const selicPeriods = selicBase.map(d => pd(d.data).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
+  buildChartTable('tbl-chartSelic', [
+    {label:'Selic Meta', color:'#f59e0b', data: toTableMap(selicBase)},
+    {label:'IPCA 12m',   color:'#f87171', data: toTableMap(fby(store.ipcaAcum||[], years))},
+  ], ' %', selicPeriods);
+
+  // Desemprego table
+  const desempBase = fby(store.desemp||[], years);
+  const desempPeriods = desempBase.map(d => pd(d.data).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
+  const roV = fillToMonthly(desempBase, store.desempRO ? fbyRO(store.desempRO, years) : null);
+  const acV = fillToMonthly(desempBase, store.desempAC ? fbyRO(store.desempAC, years) : null);
+  buildChartTable('tbl-chartDesemp', [
+    {label:'Brasil',   color:'#3b82f6', data: toTableMap(desempBase)},
+    {label:'Rondônia', color:'#f59e0b', data: toTableMapFromArray(desempBase, roV)},
+    {label:'Acre',     color:'#10b981', data: toTableMapFromArray(desempBase, acV)},
+  ], ' %', desempPeriods);
+}
+
+// ============================
 // TABLES
 // ============================
 function tblIpca(mensal, acum) {
@@ -1256,6 +1372,7 @@ async function loadAllData() {
   mkChart('chartCambio', fby(dolar,3),  chartCfg.cambio.o);
   buildDesempChart('chartDesemp', desemp, desempRO, desempAC, 5);
   if (desempRO && desempRO.length) mkChartRO('chartDesempRO', desempRO, {color:'#7c3aed', label:'Desemprego RO'});
+  refreshChartTables(5);
 
   // Histórico longo de Selic em background
   if (selic && selic.length < 100) {
@@ -1299,6 +1416,7 @@ document.querySelectorAll('.period-tabs').forEach(g => {
           mkChart(c.id, fby(store[c.key], y), opts);
         }
       }
+      refreshChartTables(y);
     });
   });
 });
