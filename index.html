@@ -252,8 +252,9 @@
   }
   .kpi-card.has-error .card-error { display: inline-block; }
 
-  /* ── Auto-refresh countdown ──────────────────────────────────────── */
+  /* ── Auto-refresh countdown (desativado) ──────────────────────────── */
   .refresh-countdown {
+    display: none;
     font-size: 11px; color: var(--text-dim);
     font-family: 'JetBrains Mono', monospace; opacity: 0.75;
   }
@@ -983,26 +984,10 @@ function mkChartRO(id, rows, o={}) {
 }
 
 // ============================
-// AUTO-REFRESH — 30 minutos
+// AUTO-REFRESH desativado
 // ============================
-const AUTO_REFRESH_MS = 30 * 60 * 1000;
-let _refreshTimer = null;
-let _countdownInterval = null;
-let _nextRefreshAt = null;
-
 function startCountdown() {
-  _nextRefreshAt = Date.now() + AUTO_REFRESH_MS;
-  if (_countdownInterval) clearInterval(_countdownInterval);
-  _countdownInterval = setInterval(() => {
-    const remaining = _nextRefreshAt - Date.now();
-    if (remaining <= 0) { clearInterval(_countdownInterval); return; }
-    const m = Math.floor(remaining / 60000);
-    const s = Math.floor((remaining % 60000) / 1000);
-    const el = document.getElementById('refreshCountdown');
-    if (el) el.textContent = `próx. em ${m}:${String(s).padStart(2,'0')}`;
-  }, 1000);
-  if (_refreshTimer) clearTimeout(_refreshTimer);
-  _refreshTimer = setTimeout(() => loadAllData(), AUTO_REFRESH_MS);
+  // desativado — atualizar manualmente pelo botão ↻
 }
 
 // ============================
