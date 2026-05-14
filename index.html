@@ -431,6 +431,7 @@
             PNG
           </button>
         </div>
+        <div class="chart-data-table" id="tbl-chartCambio"></div>
       </div>
       <div class="chart-panel">
         <div class="panel-header">
@@ -1198,6 +1199,13 @@ function refreshChartTables(years) {
     {label:'IGP-M',    color:'#06b6d4', data: toTableMap(fby(store.igpm||[], years))},
     {label:'INPC',     color:'#ec4899', data: toTableMap(fby(store.inpc||[], years))},
   ], ' %', periods);
+
+  // Câmbio table
+  const cambioBase = fby(store.dolar||[], years);
+  const cambioPeriods = cambioBase.map(d => pd(d.data).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
+  buildChartTable('tbl-chartCambio', [
+    {label:'USD/BRL', color:'#10b981', data: toTableMap(cambioBase)},
+  ], ' R$', cambioPeriods);
 
   // Selic table
   const selicBase = fby(store.selicMeta||[], years);
