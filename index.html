@@ -1271,26 +1271,105 @@ function exportChart(canvasId, label) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  // Criar canvas temporário com fundo sólido (para não ficar transparente no Canva)
+  const SC = 2; // escala 2x para nitidez
+
+  // Lê a tabela de dados abaixo do gráfico (se existir)
+  const tblEl  = document.getElementById('tbl-' + canvasId);
+  const tblRows = tblEl ? Array.from(tblEl.querySelectorAll('tr')) : [];
+  const hasTbl  = tblRows.length > 1;
+
+  const ROW_H  = 26;  // altura por linha da tabela (px em 1x)
+  const PAD    = 16;
+  const tblH   = hasTbl ? (tblRows.length * ROW_H + PAD * 2) : 0;
+
   const tmp = document.createElement('canvas');
-  tmp.width  = canvas.width  * 2;  // 2x resolução para ficar nítido na apresentação
-  tmp.height = canvas.height * 2;
-  const ctx = tmp.getContext('2d');
+  tmp.width  = canvas.width  * SC;
+  tmp.height = (canvas.height + tblH) * SC;
+  const ctx  = tmp.getContext('2d');
 
-  // Fundo azul escuro da marca
-  // Fundo transparente — sem fillRect
-
-  // Copiar o gráfico em alta resolução (2x para nitidez na apresentação)
-  ctx.scale(2, 2);
+  // ── Gráfico 2x ────────────────────────────────────────────────────
+  ctx.save();
+  ctx.scale(SC, SC);
   ctx.drawImage(canvas, 0, 0);
+  ctx.restore();
 
-  // Watermark discreta em cinza escuro (visível em fundo claro/escuro)
-  ctx.scale(0.5, 0.5);
-  ctx.font = '500 18px DM Sans, sans-serif';
-  ctx.fillStyle = 'rgba(80,80,80,0.40)';
+  // ── Tabela de dados ───────────────────────────────────────────────
+  if (hasTbl) {
+    const startY = canvas.height * SC;
+
+    // Fundo sutil da tabela
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(0, startY, tmp.width, tblH * SC);
+
+    // Linha separadora
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = SC;
+    ctx.beginPath(); ctx.moveTo(0, startY); ctx.lineTo(tmp.width, startY); ctx.stroke();
+
+    // Calcular larguras de coluna
+    const headerCells = Array.from(tblRows[0].querySelectorAll('th'));
+    const nCols    = headerCells.length;
+    const labelW   = 180 * SC;
+    const dataColW = nCols > 1 ? (tmp.width - labelW) / (nCols - 1) : 0;
+
+    tblRows.forEach((row, rIdx) => {
+      const y = startY + PAD * SC + rIdx * ROW_H * SC;
+
+      // Zebra leve nas linhas de dados
+      if (rIdx % 2 === 0 && rIdx > 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillRect(0, y - 18, tmp.width, ROW_H * SC);
+      }
+
+      const cells = Array.from(row.querySelectorAll('th,td'));
+      cells.forEach((cell, cIdx) => {
+        const x = cIdx === 0 ? PAD * SC : labelW + (cIdx - 0.5) * dataColW;
+
+        if (rIdx === 0) {
+          // Cabeçalho
+          ctx.font = `500 ${18 * SC / 2}px JetBrains Mono, monospace`;
+          ctx.fillStyle = 'rgba(138,154,184,1)';
+          ctx.textAlign = cIdx === 0 ? 'left' : 'center';
+          ctx.fillText(cell.textContent.trim(), x, y);
+        } else {
+          // Célula de dado — primeira coluna tem dot colorido
+          if (cIdx === 0) {
+            const dot = cell.querySelector('.dot');
+            const text = cell.textContent.trim();
+            if (dot) {
+              const dotColor = dot.style.background || '#888';
+              ctx.fillStyle = dotColor;
+              ctx.beginPath();
+              ctx.arc(PAD * SC + 6 * SC, y - 5, 6 * SC / 2, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = 'rgba(200,208,224,0.95)';
+              ctx.font = `500 ${18 * SC / 2}px JetBrains Mono, monospace`;
+              ctx.textAlign = 'left';
+              ctx.fillText(text.replace(/^\s*/, ''), PAD * SC + 16 * SC / 2, y);
+            } else {
+              ctx.fillStyle = 'rgba(200,208,224,0.95)';
+              ctx.font = `500 ${18 * SC / 2}px JetBrains Mono, monospace`;
+              ctx.textAlign = 'left';
+              ctx.fillText(text, x, y);
+            }
+          } else {
+            ctx.fillStyle = 'rgba(200,208,224,0.85)';
+            ctx.font = `400 ${17 * SC / 2}px JetBrains Mono, monospace`;
+            ctx.textAlign = 'center';
+            ctx.fillText(cell.textContent.trim(), x, y);
+          }
+        }
+      });
+    });
+  }
+
+  // ── Watermark ─────────────────────────────────────────────────────
+  ctx.font = `500 ${18}px DM Sans, sans-serif`;
+  ctx.fillStyle = 'rgba(80,80,80,0.38)';
+  ctx.textAlign = 'left';
   ctx.fillText('protagonize™ · Painel Econômico', 20, tmp.height - 16);
 
-  // Baixar
+  // ── Download ──────────────────────────────────────────────────────
   const date = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
   const a = document.createElement('a');
   a.download = `${label.replace(/[^a-z0-9]/gi,'_')}_${date}.png`;
