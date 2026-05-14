@@ -1297,15 +1297,6 @@ function exportChart(canvasId, label) {
   if (hasTbl) {
     const startY = canvas.height * SC;
 
-    // Fundo sutil da tabela
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
-    ctx.fillRect(0, startY, tmp.width, tblH * SC);
-
-    // Linha separadora
-    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, startY); ctx.lineTo(tmp.width, startY); ctx.stroke();
-
     // Pegar só as últimas 12 colunas de dados (+1 col de label)
     const allHeaderCells = Array.from(tblRows[0].querySelectorAll('th'));
     const labelHeader    = allHeaderCells[0];
