@@ -674,13 +674,13 @@ async function getSGSLong(code, start) {
 // Tabela 6468 = PNAD Contínua TRIMESTRAL — essa tem dados por UF (N3)
 // Variável 4099 = taxa de desocupação (%)
 // Rondônia = código UF 11
-async function getDesempRO() {
-  const key = 'ibge_desemp_ro';
+async function getDesempUF(ufCode, ufLabel) {
+  const key = `ibge_desemp_uf${ufCode}`;
+  const tag = `[IBGE ${ufLabel}]`;
 
-  // ── Tentativa 1: servicodados tabela 6468 (CORS aberto) ────────────────────
   try {
-    const url = 'https://servicodados.ibge.gov.br/api/v3/agregados/6468/periodos/-20/variaveis/4099?localidades=N3[11]';
-    console.log('[IBGE RO] Tentando servicodados t/6468...');
+    const url = `https://servicodados.ibge.gov.br/api/v3/agregados/6468/periodos/-20/variaveis/4099?localidades=N3[${ufCode}]`;
+    console.log(`${tag} servicodados t/6468...`);
     const raw = await fetchJSON(url, 2, 1200);
     if (raw && raw.length) {
       const serie = raw[0]?.resultados?.[0]?.series?.[0]?.serie;
@@ -690,61 +690,39 @@ async function getDesempRO() {
           .map(([p, v]) => ({ periodo: p, valor: parseFloat(v) }))
           .filter(r => !isNaN(r.valor))
           .sort((a, b) => sortPeriodo(a.periodo) - sortPeriodo(b.periodo));
-        if (rows.length) { cacheRO(key, rows); return rows; }
+        if (rows.length) { cacheSet(key, rows); return rows; }
       }
     }
-    throw new Error('servicodados 6468: sem dados');
-  } catch(e1) {
-    console.warn('[IBGE RO] servicodados 6468 falhou:', e1.message);
+    throw new Error('sem dados');
+  } catch(e1) { console.warn(`${tag} servicodados falhou:`, e1.message); }
+
+  for (const url of [
+    `https://apisidra.ibge.gov.br/values/t/6468/n3/${ufCode}/v/4099/p/last%2020/f/n`,
+    `https://apisidra.ibge.gov.br/values/t/4099/n3/${ufCode}/v/4099/p/last%2020/f/n`,
+  ]) {
+    try {
+      const raw = await fetchJSON(url, 2, 1200);
+      if (raw && Array.isArray(raw) && raw.length > 1) {
+        const rows = parseSidraRows(raw);
+        if (rows.length) { cacheSet(key, rows); return rows; }
+      }
+    } catch(_) {}
+    try {
+      const raw = await jsonp(url);
+      if (raw && Array.isArray(raw) && raw.length > 1) {
+        const rows = parseSidraRows(raw);
+        if (rows.length) { cacheSet(key, rows); return rows; }
+      }
+    } catch(_) {}
   }
 
-  // ── Tentativa 2: apisidra tabela 6468 via fetch ────────────────────────────
-  try {
-    const url = 'https://apisidra.ibge.gov.br/values/t/6468/n3/11/v/4099/p/last%2020/f/n';
-    console.log('[IBGE RO] Tentando apisidra t/6468 fetch...');
-    const raw = await fetchJSON(url, 2, 1200);
-    if (raw && Array.isArray(raw) && raw.length > 1) {
-      const rows = parseSidraRows(raw);
-      if (rows.length) { cacheRO(key, rows); return rows; }
-    }
-    throw new Error('apisidra 6468 fetch: sem dados');
-  } catch(e2) {
-    console.warn('[IBGE RO] apisidra 6468 fetch falhou:', e2.message);
-  }
-
-  // ── Tentativa 3: apisidra tabela 6468 via JSONP (bypass CORS total) ────────
-  try {
-    const url = 'https://apisidra.ibge.gov.br/values/t/6468/n3/11/v/4099/p/last%2020/f/n';
-    console.log('[IBGE RO] Tentando apisidra t/6468 JSONP...');
-    const raw = await jsonp(url);
-    if (raw && Array.isArray(raw) && raw.length > 1) {
-      const rows = parseSidraRows(raw);
-      if (rows.length) { cacheRO(key, rows); return rows; }
-    }
-    throw new Error('apisidra 6468 JSONP: sem dados');
-  } catch(e3) {
-    console.warn('[IBGE RO] apisidra 6468 JSONP falhou:', e3.message);
-  }
-
-  // ── Tentativa 4: apisidra tabela 4099 via JSONP ────────────────────────────
-  try {
-    const url = 'https://apisidra.ibge.gov.br/values/t/4099/n3/11/v/4099/p/last%2020/f/n';
-    console.log('[IBGE RO] Tentando apisidra t/4099 JSONP...');
-    const raw = await jsonp(url);
-    if (raw && Array.isArray(raw) && raw.length > 1) {
-      const rows = parseSidraRows(raw);
-      if (rows.length) { cacheRO(key, rows); return rows; }
-    }
-    throw new Error('apisidra 4099 JSONP: sem dados');
-  } catch(e4) {
-    console.warn('[IBGE RO] apisidra 4099 JSONP falhou:', e4.message);
-  }
-
-  // ── Fallback: cache ────────────────────────────────────────────────────────
-  console.warn('[IBGE RO] Todas as 4 tentativas falharam');
-  try { const c = cacheGet(key); if (c) return c; } catch(_){}
+  console.warn(`${tag} Todas tentativas falharam`);
+  try { const c = cacheGet(key); if (c) return c; } catch(_) {}
   return null;
 }
+
+async function getDesempRO() { return getDesempUF(11, 'RO'); }
+async function getDesempAC() { return getDesempUF(12, 'AC'); }
 
 function parseSidraRows(raw) {
   // apisidra: raw[0] = cabeçalho, raw[1+] = dados
@@ -774,6 +752,40 @@ function sortPeriodo(s) {
 function cacheRO(key, rows) {
   cacheSet(key, rows);
   console.log('[IBGE RO] ✅ OK:', rows.length, 'tri | último:', JSON.stringify(rows.at(-1)));
+}
+
+// Converte "1° tri 2024" ou "20241" → Date (último mês do trimestre)
+function quarterPeriodoToDate(s) {
+  if (!s) return null;
+  const m1 = s.match(/(\d)[°º]\s*tri.*?(\d{4})/i);
+  if (m1) { const q=+m1[1],y=+m1[2]; return new Date(y,(q-1)*3+2,28); }
+  const m2 = s.match(/(\d{4})\s*(\d)[°º]/);
+  if (m2) { const y=+m2[1],q=+m2[2]; return new Date(y,(q-1)*3+2,28); }
+  const m3 = s.match(/^(\d{4})(\d)$/);
+  if (m3) { const y=+m3[1],q=+m3[2]; return new Date(y,(q-1)*3+2,28); }
+  const m4 = s.match(/^(\d{6})$/);
+  if (m4) { const q=Math.ceil(+s.slice(4)/3); return new Date(+s.slice(0,4),(q-1)*3+2,28); }
+  return null;
+}
+
+// Filtra dados trimestrais por anos atrás
+function fbyRO(rows, y) {
+  const c = new Date(); c.setFullYear(c.getFullYear()-y);
+  return (rows||[]).filter(r => { const d=quarterPeriodoToDate(r.periodo); return d && d>=c; });
+}
+
+// Forward-fill: alinha dados trimestrais na grade mensal do Brasil
+function fillToMonthly(monthlyBase, quarterlyRows) {
+  if (!quarterlyRows || !quarterlyRows.length) return null;
+  return monthlyBase.map(md => {
+    const mDate = pd(md.data);
+    let val = null;
+    for (let i = quarterlyRows.length-1; i >= 0; i--) {
+      const qDate = quarterPeriodoToDate(quarterlyRows[i].periodo);
+      if (qDate && qDate <= mDate) { val = quarterlyRows[i].valor; break; }
+    }
+    return val;
+  });
 }
 
 function fmtPeriodo(s) {
@@ -987,8 +999,9 @@ function mkChart(id, data, o={}) {
   if (charts[id]) charts[id].destroy();
 
   const labels = data.map(d => pd(d.data).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
-  const vals = data.map(d => parseFloat(d.valor));
+  const vals   = data.map(d => parseFloat(d.valor));
   const c = o.color || '#3b82f6';
+  const hasExtra = o.extra && o.extra.length > 0;
 
   const ds = [{
     label: o.label||'', data: vals,
@@ -996,11 +1009,30 @@ function mkChart(id, data, o={}) {
     borderWidth: 2, pointRadius: 0, pointHoverRadius: 4,
     pointHoverBackgroundColor: c, fill: true, tension: 0.3,
   }];
+
+  // Séries extras (IGP-M, INPC, IPCA comparativo, etc.)
+  if (hasExtra) {
+    o.extra.forEach(ex => {
+      if (!ex.data || !ex.data.length) return;
+      const ec = ex.color || '#888';
+      ds.push({
+        label: ex.label||'',
+        data: ex.data.map(d => parseFloat(d.valor)),
+        borderColor: ec, backgroundColor: `rgba(${rgb(ec)},0.0)`,
+        borderWidth: 2, pointRadius: 0, pointHoverRadius: 4,
+        pointHoverBackgroundColor: ec, fill: false, tension: 0.3,
+        borderDash: ex.dashed ? [5,3] : [],
+      });
+    });
+  }
+
   if (o.target != null) ds.push({
     label: 'Meta', data: Array(vals.length).fill(o.target),
     borderColor: 'rgba(239,68,68,0.4)', borderWidth: 1, borderDash: [6,4],
     pointRadius: 0, fill: false,
   });
+
+  const showLegend = !!(o.target || hasExtra);
 
   charts[id] = new Chart(ctx, {
     type: 'line', data: { labels, datasets: ds },
@@ -1008,17 +1040,64 @@ function mkChart(id, data, o={}) {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { display: !!o.target, labels: { color:'#8a9ab8', font:{size:10,family:'JetBrains Mono'} } },
+        legend: { display: showLegend, labels: { color:'#c8d0e0', font:{size:10,family:'JetBrains Mono'}, boxWidth:20, padding:12 } },
         tooltip: {
           backgroundColor:'rgba(15,25,50,0.95)', titleColor:'#f0f4ff', bodyColor:'#c8d0e0',
-          borderColor:'rgba(255,255,255,0.2)', borderWidth:1, padding:10, displayColors:false,
+          borderColor:'rgba(255,255,255,0.2)', borderWidth:1, padding:10,
+          displayColors: showLegend,
           titleFont:{family:'JetBrains Mono',size:11}, bodyFont:{family:'JetBrains Mono',size:11},
-          callbacks:{ label: t => `${t.dataset.label}: ${t.parsed.y.toFixed(2).replace('.',',')}${o.unit||''}` }
+          callbacks:{ label: t => ` ${t.dataset.label}: ${t.parsed.y.toFixed(o.yd||2).replace('.',',')}${o.unit||''}` }
         }
       },
       scales: {
         x: { ticks:{color:'#8a9ab8',font:{size:10,family:'JetBrains Mono'},maxTicksLimit:12}, grid:{color:'rgba(255,255,255,0.07)'}, border:{color:'rgba(255,255,255,0.1)'} },
         y: { ticks:{color:'#8a9ab8',font:{size:10,family:'JetBrains Mono'}, callback: v => v.toFixed(o.yd||1).replace('.',',')+(o.unit||'')}, grid:{color:'rgba(255,255,255,0.05)'}, border:{color:'rgba(255,255,255,0.1)'} }
+      }
+    }
+  });
+}
+
+// Gráfico de desemprego: Brasil mensal + estados trimestrais (forward-fill)
+function buildDesempChart(id, brasil, ro, ac, years) {
+  const ctx = document.getElementById(id);
+  if (!ctx || !brasil || !brasil.length) return;
+  if (charts[id]) charts[id].destroy();
+
+  const mainData = fby(brasil, years);
+  if (!mainData.length) return;
+
+  const labels   = mainData.map(d => pd(d.data).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
+  const brasilV  = mainData.map(d => parseFloat(d.valor));
+  const roRows   = ro  ? fbyRO(ro,  years) : null;
+  const acRows   = ac  ? fbyRO(ac,  years) : null;
+  const roV      = fillToMonthly(mainData, roRows);
+  const acV      = fillToMonthly(mainData, acRows);
+
+  const ds = [{
+    label:'Brasil', data: brasilV,
+    borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.07)',
+    borderWidth:2, pointRadius:0, pointHoverRadius:4, fill:true, tension:0.3,
+  }];
+  if (roV) ds.push({ label:'Rondônia', data:roV, borderColor:'#f59e0b', backgroundColor:'transparent', borderWidth:2, pointRadius:0, pointHoverRadius:4, fill:false, tension:0 });
+  if (acV) ds.push({ label:'Acre',     data:acV, borderColor:'#10b981', backgroundColor:'transparent', borderWidth:2, pointRadius:0, pointHoverRadius:4, fill:false, tension:0 });
+
+  charts[id] = new Chart(ctx, {
+    type:'line', data:{ labels, datasets:ds },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{ display:true, labels:{ color:'#c8d0e0', font:{size:10,family:'JetBrains Mono'}, boxWidth:20, padding:12 } },
+        tooltip:{
+          backgroundColor:'rgba(15,25,50,0.95)', titleColor:'#f0f4ff', bodyColor:'#c8d0e0',
+          borderColor:'rgba(255,255,255,0.2)', borderWidth:1, padding:10, displayColors:true,
+          titleFont:{family:'JetBrains Mono',size:11}, bodyFont:{family:'JetBrains Mono',size:11},
+          callbacks:{ label: t => t.parsed.y != null ? ` ${t.dataset.label}: ${t.parsed.y.toFixed(1).replace('.',',')} %` : null }
+        }
+      },
+      scales:{
+        x:{ ticks:{color:'#8a9ab8',font:{size:10,family:'JetBrains Mono'},maxTicksLimit:12}, grid:{color:'rgba(255,255,255,0.07)'}, border:{color:'rgba(255,255,255,0.1)'} },
+        y:{ ticks:{color:'#8a9ab8',font:{size:10,family:'JetBrains Mono'}, callback: v => v.toFixed(1).replace('.',',')+' %'}, grid:{color:'rgba(255,255,255,0.05)'}, border:{color:'rgba(255,255,255,0.1)'} }
       }
     }
   });
@@ -1107,10 +1186,22 @@ function exportChart(canvasId, label) {
 // MAIN LOAD
 // ============================
 const chartCfg = {
-  ipca:  {id:'chartIpca',  key:'ipcaAcum',  o:{color:'#3b82f6',label:'IPCA 12m',unit:'%',target:3.0}},
-  selic: {id:'chartSelic', key:'selicMeta', o:{color:'#f59e0b',label:'Selic Meta',unit:'% a.a.'}},
-  cambio:{id:'chartCambio',key:'dolar',     o:{color:'#10b981',label:'USD/BRL',unit:'',yd:2}},
-  desemp:{id:'chartDesemp',key:'desemp',    o:{color:'#8b5cf6',label:'Desemprego',unit:'%'}},
+  ipca:  {
+    id:'chartIpca', key:'ipcaAcum',
+    o:{color:'#3b82f6',label:'IPCA 12m',unit:'%',target:3.0},
+    extras:[
+      {key:'igpm',  color:'#06b6d4', label:'IGP-M'},
+      {key:'inpc',  color:'#ec4899', label:'INPC'},
+    ]
+  },
+  selic: {
+    id:'chartSelic', key:'selicMeta',
+    o:{color:'#f59e0b',label:'Selic Meta',unit:'% a.a.'},
+    extras:[
+      {key:'ipcaAcum', color:'#f87171', label:'IPCA 12m', dashed:true},
+    ]
+  },
+  cambio:{id:'chartCambio',key:'dolar', o:{color:'#10b981',label:'USD/BRL',unit:'',yd:2}},
 };
 
 async function loadAllData() {
@@ -1123,11 +1214,12 @@ async function loadAllData() {
   const s10 = startDate(10), s1 = startDate(1);
 
   // IPCA, Desemprego e novos indicadores primeiro (mais estáveis)
-  const [ipcaM, ipcaA, desemp, desempRO, igpm, inpc] = await Promise.all([
+  const [ipcaM, ipcaA, desemp, desempRO, desempAC, igpm, inpc] = await Promise.all([
     getSGS(SERIES.ipca, s10),
     getSGS(SERIES.ipcaAcum, s10),
     getSGS(SERIES.desemp, s10),
     getDesempRO(),
+    getDesempAC(),
     getSGS(SERIES.igpm, s10),
     getSGS(SERIES.inpc, s10),
   ]);
@@ -1141,21 +1233,28 @@ async function loadAllData() {
   store.ipcaMensal = ipcaM; store.ipcaAcum = ipcaA;
   store.selicMeta = selic; store.dolar = dolar;
   store.desemp = desemp; store.cdi = cdi;
-  store.desempRO = desempRO; store.igpm = igpm; store.inpc = inpc;
+  store.desempRO = desempRO; store.desempAC = desempAC;
+  store.igpm = igpm; store.inpc = inpc;
 
-  setCard('ipca',   ipcaA, {dec:2});
-  setCard('selic',  selic, {dec:2});
-  setCard('cambio', dolar, {dec:4});
+  setCard('ipca',   ipcaA,  {dec:2});
+  setCard('selic',  selic,  {dec:2});
+  setCard('cambio', dolar,  {dec:4});
   setCard('desemp', desemp, {dec:1, inv:true});
   setCardRO(desempRO);
   setCard('cdi',  cdi,  {dec:2});
   setCard('igpm', igpm, {dec:2});
   setCard('inpc', inpc, {dec:2});
 
-  mkChart('chartIpca',   fby(ipcaA,5),  chartCfg.ipca.o);
-  mkChart('chartSelic',  fby(selic,5),  chartCfg.selic.o);
+  // Helper: monta opções com extras filtrados por anos
+  function mkOpts(cfg, years) {
+    const extra = (cfg.extras||[]).map(ex => ({...ex, data: fby(store[ex.key]||[], years)})).filter(ex => ex.data.length);
+    return extra.length ? {...cfg.o, extra} : cfg.o;
+  }
+
+  mkChart('chartIpca',   fby(ipcaA,5),  mkOpts(chartCfg.ipca,  5));
+  mkChart('chartSelic',  fby(selic,5),  mkOpts(chartCfg.selic, 5));
   mkChart('chartCambio', fby(dolar,3),  chartCfg.cambio.o);
-  mkChart('chartDesemp', fby(desemp,5), chartCfg.desemp.o);
+  buildDesempChart('chartDesemp', desemp, desempRO, desempAC, 5);
   if (desempRO && desempRO.length) mkChartRO('chartDesempRO', desempRO, {color:'#7c3aed', label:'Desemprego RO'});
 
   // Histórico longo de Selic em background
@@ -1164,7 +1263,7 @@ async function loadAllData() {
       const selicLong = await getSGSLong(SERIES.selic, startDate(10));
       if (selicLong && selicLong.length > selic.length) {
         store.selicMeta = selicLong;
-        mkChart('chartSelic', fby(selicLong,5), chartCfg.selic.o);
+        mkChart('chartSelic', fby(selicLong,5), mkOpts(chartCfg.selic, 5));
       }
     }, 1500);
   }
@@ -1189,8 +1288,17 @@ document.querySelectorAll('.period-tabs').forEach(g => {
     t.addEventListener('click', () => {
       g.querySelectorAll('.period-tab').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
-      const y = parseInt(t.dataset.years), k = g.dataset.chart, c = chartCfg[k];
-      if (c && store[c.key]) mkChart(c.id, fby(store[c.key], y), c.o);
+      const y = parseInt(t.dataset.years), k = g.dataset.chart;
+      if (k === 'desemp') {
+        buildDesempChart('chartDesemp', store.desemp, store.desempRO, store.desempAC, y);
+      } else {
+        const c = chartCfg[k];
+        if (c && store[c.key]) {
+          const extra = (c.extras||[]).map(ex => ({...ex, data: fby(store[ex.key]||[], y)})).filter(ex => ex.data.length);
+          const opts = extra.length ? {...c.o, extra} : c.o;
+          mkChart(c.id, fby(store[c.key], y), opts);
+        }
+      }
     });
   });
 });
